@@ -65,18 +65,18 @@ static spinlock_t speedchange_cpumask_lock;
 static struct mutex gov_lock;
 
 /* Hi speed to bump to from lo speed when load burst (default max) */
-static unsigned int hispeed_freq;
+static unsigned int hispeed_freq = 1497600;
 
 /* Go to hi speed when CPU load at or above this value. */
-#define DEFAULT_GO_HISPEED_LOAD 99
+#define DEFAULT_GO_HISPEED_LOAD 90
 static unsigned long go_hispeed_load = DEFAULT_GO_HISPEED_LOAD;
 
 /* Sampling down factor to be applied to min_sample_time at max freq */
-static unsigned int sampling_down_factor;
+static unsigned int sampling_down_factor = 100000;
 
 /* Target load.  Lower values result in higher CPU speeds. */
 #define DEFAULT_TARGET_LOAD 90
-static unsigned int default_target_loads[] = {DEFAULT_TARGET_LOAD};
+static unsigned int default_target_loads[5] = {85, 1500000, 90, 1800000, 95};
 static spinlock_t target_loads_lock;
 static unsigned int *target_loads = default_target_loads;
 static int ntarget_loads = ARRAY_SIZE(default_target_loads);
@@ -84,7 +84,7 @@ static int ntarget_loads = ARRAY_SIZE(default_target_loads);
 /*
  * The minimum amount of time to spend at a frequency before we can ramp down.
  */
-#define DEFAULT_MIN_SAMPLE_TIME (80 * USEC_PER_MSEC)
+#define DEFAULT_MIN_SAMPLE_TIME (40 * USEC_PER_MSEC)
 static unsigned long min_sample_time = DEFAULT_MIN_SAMPLE_TIME;
 
 /*
@@ -101,8 +101,7 @@ static unsigned long timer_rate = DEFAULT_TIMER_RATE;
  * timer interval.
  */
 #define DEFAULT_ABOVE_HISPEED_DELAY DEFAULT_TIMER_RATE
-static unsigned int default_above_hispeed_delay[] = {
-	DEFAULT_ABOVE_HISPEED_DELAY };
+static unsigned int default_above_hispeed_delay[5] = {20000, 1400000, 40000, 1700000, 20000};
 static spinlock_t above_hispeed_delay_lock;
 static unsigned int *above_hispeed_delay = default_above_hispeed_delay;
 static int nabove_hispeed_delay = ARRAY_SIZE(default_above_hispeed_delay);
@@ -110,7 +109,8 @@ static int nabove_hispeed_delay = ARRAY_SIZE(default_above_hispeed_delay);
 /* Non-zero means indefinite speed boost active */
 static int boost_val;
 /* Duration of a boot pulse in usecs */
-static int boostpulse_duration_val = DEFAULT_MIN_SAMPLE_TIME;
+#define DEFAULT_BOOSTPULSE_DURATION_VAL (5 * DEFAULT_TIMER_RATE)
+static int boostpulse_duration_val = DEFAULT_BOOSTPULSE_DURATION_VAL;
 /* End time of boost pulse in ktime converted to usecs */
 static u64 boostpulse_endtime;
 
@@ -121,7 +121,7 @@ static u64 boostpulse_endtime;
 #define DEFAULT_TIMER_SLACK (4 * DEFAULT_TIMER_RATE)
 static int timer_slack_val = DEFAULT_TIMER_SLACK;
 
-static bool io_is_busy;
+static bool io_is_busy = true;
 
 /*
  * If the max load among other CPUs is higher than up_threshold_any_cpu_load
@@ -129,9 +129,9 @@ static bool io_is_busy;
  * up_threshold_any_cpu_freq then do not let the frequency to drop below
  * sync_freq
  */
-static unsigned int up_threshold_any_cpu_load;
-static unsigned int sync_freq;
-static unsigned int up_threshold_any_cpu_freq;
+static unsigned int up_threshold_any_cpu_load = 80;
+static unsigned int sync_freq = 1036800;
+static unsigned int up_threshold_any_cpu_freq = 1728000;
 
 static int cpufreq_governor_interactive(struct cpufreq_policy *policy,
 		unsigned int event);
